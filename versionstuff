@@ -1,0 +1,113 @@
+# Version 1.0
+import tkinter as tk
+from tkinter import messagebox
+import gpt_2_simple as gpt2
+import requests
+
+MODEL_NAME = "345M"
+INSTRUCTION_PROMPT = "You are an AI language model. Please provide helpful and appropriate responses."
+MESSAGE_HISTORY_FILE = "messagehistory.txt"
+SCRIPT_GITHUB_LINK = "https://raw.githubusercontent.com/your_username/your_repository/main/chatbot.py"
+VERSION_NUMBER = "1.0"
+def load_model():
+    try:
+        print("Loading the GPT-2 model...")
+        sess = gpt2.start_tf_sess()
+        gpt2.load_gpt2(sess, model_name=MODEL_NAME)
+        return sess
+    except Exception as e:
+        print("Error occurred while loading the model:")
+        print(e)
+        messagebox.showerror("Error", "Failed to load the GPT-2 model.")
+        return None
+
+def generate_text(sess, prompt, length=50, temperature=0.7):
+    print("Generating text...")
+    response = gpt2.generate(sess, model_name=MODEL_NAME, prefix=prompt, length=length, temperature=temperature, return_as_list=True)[0]
+    response_lines = response.split("\n")
+    if len(response_lines) > 1:
+        response = response_lines[len(prompt.split("\n"))].strip()
+    return response
+
+def save_chat_history(user_input, response):
+    with open(MESSAGE_HISTORY_FILE, "a") as file:
+        file.write(f"User: {user_input}\n")
+        file.write(f"AI: {response}\n")
+
+def quit_program():
+    answer = messagebox.askyesno("Quit", "Are you sure you want to quit?")
+    if answer:
+        root.destroy()
+
+def check_for_updates():
+    try:
+        print("Checking for updates...")
+        response = requests.get(SCRIPT_GITHUB_LINK)
+        remote_script = response.text
+        remote_version = remote_script.split("# Version ")[-1].strip()
+        if remote_version != VERSION_NUMBER:
+            messagebox.showerror("Update Required", f"Update required! New version available: {remote_version}")
+        else:
+            messagebox.showinfo("No Updates", "No updates available. You are using the latest version.")
+    except Exception as e:
+        print("Error occurred while checking for updates:")
+        print(e)
+        messagebox.showerror("Error", "Failed to check for updates.")
+
+def chat():
+    sess = load_model()
+    if sess is None:
+        return
+
+    top = tk.Toplevel()
+    top.title("Chat")
+    top.geometry("600x400")
+
+    def send_message():
+        user_input = input_entry.get("1.0", tk.END).strip()
+        prompt = "User: " + user_input + "\nAI:"
+        response = generate_text(sess, prompt)
+        save_chat_history(user_input, response)
+        output_text.insert(tk.END, "User: " + user_input + "\n")
+        output_text.insert(tk.END, "AI: " + response + "\n")
+        input_entry.delete("1.0", tk.END)
+
+    chat_frame = tk.Frame(top)
+    chat_frame.pack(pady=20)
+
+    output_text = tk.Text(chat_frame, width=70, height=10)
+    output_text.pack()
+
+    input_frame = tk.Frame(top)
+    input_frame.pack(pady=20)
+
+    input_entry = tk.Text(input_frame, width=50, height=3)
+    input_entry.pack(side=tk.LEFT)
+
+    send_button = tk.Button(input_frame, text="Send", command=send_message)
+    send_button.pack(side=tk.LEFT, padx=10)
+
+    top.mainloop()
+
+def main():
+    root = tk.Tk()
+    root.title("GPT-2 Chatbot")
+    root.geometry("600x400")
+
+    label = tk.Label(root, text="GPT-2 Chatbot")
+    label.pack(pady=20)
+
+    chat_button = tk.Button(root, text="Chat", command=chat)
+    chat_button.pack(pady=20)
+
+    update_button = tk.Button(root, text="Update", command=check_for_updates)
+    update_button.pack(pady=20)
+
+    quit_button = tk.Button(root, text="Quit", command=quit_program)
+    quit_button.pack(pady=20)
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
+
