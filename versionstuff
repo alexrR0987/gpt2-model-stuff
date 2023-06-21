@@ -7,7 +7,7 @@ import requests
 MODEL_NAME = "345M"
 INSTRUCTION_PROMPT = "You are an AI language model. Please provide helpful and appropriate responses."
 MESSAGE_HISTORY_FILE = "messagehistory.txt"
-SCRIPT_GITHUB_LINK = "https://raw.githubusercontent.com/your_username/your_repository/main/chatbot.py"
+SCRIPT_GITHUB_LINK = "https://raw.githubusercontent.com/alexrR0987/gpt2-model-stuff/main/versionstuff"
 VERSION_NUMBER = "1.0"
 def load_model():
     try:
