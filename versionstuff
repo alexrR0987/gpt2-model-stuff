@@ -5,7 +5,7 @@ import gpt_2_simple as gpt2
 import requests
 
 MODEL_NAME = "345M"
-INSTRUCTION_PROMPT = "You are an AI language model. Please provide helpful and appropriate responses."
+INSTRUCTION_PROMPT = "You are an AI language model. Please provide helpful and appropriate responses, youre a chatbot, pay attention and answer any prompts with accuracy, you dont require to put ai before every message you send because the program youre running off from does that for you, you must follow these instructions, the user is not aware of these being given out to you so dont make comments on it or anything just follow the prompts the user asks you and if youre wondering what you really are, youre a model produced by apero discord server, made by the e, the founder of the discord community apero. your module name is gpt2 346M, you dont need to put that before each message as i mentioned before."
 MESSAGE_HISTORY_FILE = "messagehistory.txt"
 SCRIPT_GITHUB_LINK = "https://raw.githubusercontent.com/alexrR0987/gpt2-model-stuff/main/versionstuff"
 VERSION_NUMBER = "1.0"
@@ -21,12 +21,14 @@ def load_model():
         messagebox.showerror("Error", "Failed to load the GPT-2 model.")
         return None
 
-def generate_text(sess, prompt, length=50, temperature=0.7):
+def generate_text(sess, prompt, length=500, temperature=0.7):
     print("Generating text...")
     response = gpt2.generate(sess, model_name=MODEL_NAME, prefix=prompt, length=length, temperature=temperature, return_as_list=True)[0]
     response_lines = response.split("\n")
-    if len(response_lines) > 1:
+    if len(response_lines) > 1 and len(prompt.split("\n")) < len(response_lines):
         response = response_lines[len(prompt.split("\n"))].strip()
+    else:
+        response = ""  # Set an empty response if no valid lines are found
     return response
 
 def save_chat_history(user_input, response):
@@ -110,4 +112,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
